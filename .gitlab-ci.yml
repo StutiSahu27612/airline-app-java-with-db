@@ -15,7 +15,7 @@ variables:
 # Build Job
 build:
   stage: build
-  script:
+  script: 
     - mvn clean compile
   artifacts:
     paths:
