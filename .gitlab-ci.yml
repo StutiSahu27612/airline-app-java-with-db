@@ -1,0 +1,38 @@
+stages:
+  - build
+  - test
+
+# Specify a base image with Java and Maven installed
+image: maven:3.8.6-openjdk-17
+
+# Define a service for the MySQL database
+services:
+  - name: mysql:8.0
+    alias: mysql
+
+# Define environment variables for the MySQL service
+variables:
+  MYSQL_DATABASE: airline
+  MYSQL_USER: root
+  MYSQL_PASSWORD: root
+  DB_URL: jdbc:mysql://34.28.51.207:3306/airline
+
+# Maven Build Job
+build:
+  stage: build
+  script:
+    - echo "Starting Maven Build"
+    - mvn clean compile
+  artifacts:
+    paths:
+      - target/
+
+# Maven Test Job
+test:
+  stage: test
+  script:
+    - echo "Waiting for MySQL to be ready..."
+    # Wait for MySQL service to be ready before running tests
+    - sleep 20  # Increase if MySQL needs more time
+    - echo "Starting Maven Tests"
+    - mvn test -Dspring.datasource.url=$DB_URL -Dspring.datasource.username=$MYSQL_USER -Dspring.datasource.password=$MYSQL_PASSWORD
