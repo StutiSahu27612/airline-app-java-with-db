@@ -26,4 +26,4 @@ test:
   stage: test
   script:
     - echo "Connecting to GCP MySQL instance..."
-    - mvn test -X
+    - mvn test -X  
