@@ -16,7 +16,7 @@ variables:
   MYSQL_ROOT_PASSWORD: root
   MYSQL_USER: root
   MYSQL_PASSWORD: root
-  DB_URL: jdbc:mysql://34.28.51.207:3306/airline
+  DB_URL: jdbc:mysql://34.28.51.207:3306/test_db
 
 # Maven Build Job
 build:
