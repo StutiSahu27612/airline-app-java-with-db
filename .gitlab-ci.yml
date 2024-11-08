@@ -19,7 +19,7 @@ build:
     - mvn clean compile
   artifacts:
     paths:
-      - target/
+      - target/  
 
 # Test Job
 test:
