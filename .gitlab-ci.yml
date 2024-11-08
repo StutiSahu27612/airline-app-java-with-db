@@ -18,7 +18,7 @@ build:
   script: 
     - mvn clean compile
   artifacts:
-    paths:
+    paths: 
       - target/  
 
 # Test Job
