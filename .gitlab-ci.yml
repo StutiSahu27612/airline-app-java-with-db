@@ -26,4 +26,4 @@ test:
   stage: test
   script:
     - echo "Connecting to GCP MySQL instance..."
-    - mvn test -Dspring.datasource.url=$DB_URL -Dspring.datasource.username=$DB_USER -Dspring.datasource.password=$DB_PASSWORD
+    - mvn test -X
