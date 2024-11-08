@@ -1,39 +1,29 @@
+# .gitlab-ci.yml
+
 stages:
   - build
   - test
 
-# Specify a base image with Java and Maven installed
-image: maven:3.8.6-openjdk-17
+# Use Maven with OpenJDK 17 from Eclipse Temurin
+image: maven:3.8.6-eclipse-temurin-17
 
-# Define a service for the MySQL database
-services:
-  - name: mysql:8.0
-    alias: mysql
-
-# Define environment variables for the MySQL service
 variables:
-  MYSQL_DATABASE: airline
-  MYSQL_ROOT_PASSWORD: root
-  MYSQL_USER: root
-  MYSQL_PASSWORD: root
-  DB_URL: jdbc:mysql://34.28.51.207:3306/test_db
+  DB_URL: $DB_URL
+  DB_USER: $DB_USER
+  DB_PASSWORD: $DB_PASSWORD
 
-# Maven Build Job
+# Build Job
 build:
   stage: build
   script:
-    - echo "Starting Maven Build"
     - mvn clean compile
   artifacts:
     paths:
       - target/
 
-# Maven Test Job
+# Test Job
 test:
   stage: test
   script:
-    - echo "Waiting for MySQL to be ready..."
-    # Wait for MySQL service to be ready before running tests
-    - sleep 20  # Increase if MySQL needs more time
-    - echo "Starting Maven Tests"
-    - mvn test -Dspring.datasource.url=$DB_URL -Dspring.datasource.username=$MYSQL_USER -Dspring.datasource.password=$MYSQL_PASSWORD
+    - echo "Connecting to GCP MySQL instance..."
+    - mvn test -Dspring.datasource.url=$DB_URL -Dspring.datasource.username=$DB_USER -Dspring.datasource.password=$DB_PASSWORD
