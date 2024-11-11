@@ -49,6 +49,7 @@ variables:
   DB_USER: $DB_USER
   DB_PASSWORD: $DB_PASSWORD
   GCP_PROJECT_ID: maximal-brace-436007-t5
+  WORKLOAD_IDENTITY_POOL: airline-javaapp-pool
   GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-javaapp-pool"
   SERVICE_ACCOUNT_EMAIL: java-app-sa@maximal-brace-436007-t5.iam.gserviceaccount.com
 
@@ -60,8 +61,8 @@ before_script:
   - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
   - apt-get update && apt-get install -y google-cloud-sdk
   
-  - echo "Authenticating with GCP using Workload Identity Federation"
-  - gcloud auth login --impersonate-service-account=$SERVICE_ACCOUNT_EMAIL --workload-identity-federation
+  - echo "Checking with GCP using Workload Identity Federation"
+  - gcloud iam workload-identity-pools describe $WORKLOAD_IDENTITY_POOL --location global --project=$GCP_PROJECT_ID
   # # Set project and service account using the integrated Workload Identity Federation
   # - gcloud config set project $GCP_PROJECT_ID
   # - gcloud config set account $SERVICE_ACCOUNT_EMAIL
