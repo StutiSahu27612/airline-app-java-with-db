@@ -1,7 +1,7 @@
 # .gitlab-ci.yml
 
 stages:
-  - build
+  - build 
   - test
 
 # Use Maven with OpenJDK 17 from Eclipse Temurin
