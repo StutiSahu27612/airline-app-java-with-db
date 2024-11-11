@@ -5,16 +5,6 @@
 #   - coverage
 
 
-
-stages:
-  - verify_oidc
-
-verify_oidc_token:
-  stage: verify_oidc
-  image: debian:bullseye-slim  # Or any other image with jq pre-installed
-  script:
-    - apt-get update && apt-get install -y jq  # Install jq if not included in the image
-    - echo $CI_JOB_JWT | cut -d "." -f2 | base64 -d | jq '.'  # Decode the JWT and display its claims
 # image: maven:3.8.6-eclipse-temurin-17
 # build:
 #   stage: build
@@ -47,48 +37,48 @@ verify_oidc_token:
 #       - target/site/jacoco/  # Save the JaCoCo report as an artifact
 #     expire_in: 1 week  # Optional: Set expiration time for the artifacts
 #############################################################################################
-# stages:
-#   - build
-#   - test
+stages:
+  - build
+  - test
 
-# # Use Maven with OpenJDK 17 from Eclipse Temurin
-# image: maven:3.8.6-eclipse-temurin-17
+# Use Maven with OpenJDK 17 from Eclipse Temurin
+image: maven:3.8.6-eclipse-temurin-17
 
-# variables:
-#   DB_URL: $DB_URL
-#   DB_USER: $DB_USER
-#   DB_PASSWORD: $DB_PASSWORD
-#   GCP_PROJECT_ID: maximal-brace-436007-t5
-#   GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-app-java-wif"
-#   SERVICE_ACCOUNT_EMAIL: airline-app-java@maximal-brace-436007-t5.iam.gserviceaccount.com
+variables:
+  DB_URL: $DB_URL
+  DB_USER: $DB_USER
+  DB_PASSWORD: $DB_PASSWORD
+  GCP_PROJECT_ID: maximal-brace-436007-t5
+  GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-app-java-wif"
+  SERVICE_ACCOUNT_EMAIL: airline-app-service-account@maximal-brace-436007-t5.iam.gserviceaccount.com
 
 
-# before_script:
-#   # Install Google Cloud SDK
-#   - apt-get update && apt-get install -y apt-transport-https ca-certificates gnupg
-#   - echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-#   - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-#   - apt-get update && apt-get install -y google-cloud-sdk
+before_script:
+  # Install Google Cloud SDK
+  - apt-get update && apt-get install -y apt-transport-https ca-certificates gnupg
+  - echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+  - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+  - apt-get update && apt-get install -y google-cloud-sdk
   
-#   # Set project and service account using the integrated Workload Identity Federation
-#   - gcloud config set project $GCP_PROJECT_ID
-#   - gcloud config set account $SERVICE_ACCOUNT_EMAIL
+  # Set project and service account using the integrated Workload Identity Federation
+  - gcloud config set project $GCP_PROJECT_ID
+  - gcloud config set account $SERVICE_ACCOUNT_EMAIL
 
-# # Build Job
-# build:
-#   stage: build
-#   script: 
-#     - mvn clean compile
-#   artifacts:
-#     paths:
-#       - target/
+# Build Job
+build:
+  stage: build
+  script: 
+    - mvn clean compile
+  artifacts:
+    paths:
+      - target/
 
-# # Test Job
-# test:
-#   stage: test
-#   script:
-#     - echo "Connecting to GCP MySQL instance..."
-#     - mvn test -X
+# Test Job
+test:
+  stage: test
+  script:
+    - echo "Connecting to GCP MySQL instance..."
+    - mvn test -X
 
 #######################################################
 # stages:
