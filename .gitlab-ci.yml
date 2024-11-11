@@ -4,8 +4,10 @@ stages:
 
 verify_oidc_token:
   stage: verify_oidc
+  image: ruby:3.1
   script:
-    - echo $CI_JOB_JWT | cut -d "." -f2 | base64 -d | jq '.'
+    - apt-get update && apt-get install -y jq  # Install jq
+    - echo $CI_JOB_JWT | cut -d "." -f2 | base64 -d | jq '.'  # Decode the JWT and display its claims
 
 # stages:
 #   - build
