@@ -60,12 +60,15 @@ before_script:
   - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
   - apt-get update && apt-get install -y google-cloud-sdk
   
-  # Set project and service account using the integrated Workload Identity Federation
-  - gcloud config set project $GCP_PROJECT_ID
-  - gcloud config set account $SERVICE_ACCOUNT_EMAIL
+  before_script:
+  - echo "Authenticating with GCP using Workload Identity Federation"
+  - gcloud auth login --impersonate-service-account=$SERVICE_ACCOUNT_EMAIL --workload-identity-federation
+  # # Set project and service account using the integrated Workload Identity Federation
+  # - gcloud config set project $GCP_PROJECT_ID
+  # - gcloud config set account $SERVICE_ACCOUNT_EMAIL
 
-    # Authenticate using Workload Identity Federation (WIF)
-  - gcloud auth login --enable-gdrive-access --impersonate-service-account=$SERVICE_ACCOUNT_EMAIL --allow-local-impersonation --workload-identity-federation
+  #   # Authenticate using Workload Identity Federation (WIF)
+  # - gcloud auth login --enable-gdrive-access --impersonate-service-account=$SERVICE_ACCOUNT_EMAIL --allow-local-impersonation --workload-identity-federation
 
 # Build Job
 build:
