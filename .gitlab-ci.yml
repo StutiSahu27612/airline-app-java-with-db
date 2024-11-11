@@ -12,12 +12,7 @@ variables:
   DB_USER: $DB_USER
   DB_PASSWORD: $DB_PASSWORD
 
-before_script:
-  # Authenticate with Google Cloud using Workload Identity Federation (WIF)
-  - echo "Authenticating with Google Cloud using Workload Identity Federation..."
-  - gcloud auth login --brief
-  
-  - gcloud auth configure-docker
+
 
 # Build Job
 build:
