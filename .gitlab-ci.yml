@@ -53,7 +53,7 @@ variables:
   SERVICE_ACCOUNT_EMAIL: airline-app-service-account@maximal-brace-436007-t5.iam.gserviceaccount.com
 
 
-before_script:
+before_script:  
   # Install Google Cloud SDK
   - apt-get update && apt-get install -y apt-transport-https ca-certificates gnupg
   - echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
