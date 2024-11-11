@@ -49,8 +49,8 @@ variables:
   DB_USER: $DB_USER
   DB_PASSWORD: $DB_PASSWORD
   GCP_PROJECT_ID: maximal-brace-436007-t5
-  GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-app-java-wif"
-  SERVICE_ACCOUNT_EMAIL: airline-app-service-account@maximal-brace-436007-t5.iam.gserviceaccount.com
+  GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-javaapp-pool"
+  SERVICE_ACCOUNT_EMAIL: java-app-sa@maximal-brace-436007-t5.iam.gserviceaccount.com
 
 
 before_script:  
@@ -63,6 +63,9 @@ before_script:
   # Set project and service account using the integrated Workload Identity Federation
   - gcloud config set project $GCP_PROJECT_ID
   - gcloud config set account $SERVICE_ACCOUNT_EMAIL
+
+    # Authenticate using Workload Identity Federation (WIF)
+  - gcloud auth login --enable-gdrive-access --impersonate-service-account=$SERVICE_ACCOUNT_EMAIL --allow-local-impersonation --workload-identity-federation
 
 # Build Job
 build:
