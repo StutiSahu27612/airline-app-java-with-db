@@ -26,7 +26,7 @@ check-jwt:
           echo "Failed to decode the JWT token"
           exit 1
         fi
-      fi
+      fi  
   only:
     - master  # or your branch of choice # Decode the JWT and display its claims
 
