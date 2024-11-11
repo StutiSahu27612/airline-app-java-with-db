@@ -1,40 +1,52 @@
 # # .gitlab-ci.yml
+# stages:
+#   - build
+#   - test
+#   - coverage
+
+
+
 stages:
-  - build
-  - test
-  - coverage
+  - verify_oidc
 
-image: maven:3.8.6-eclipse-temurin-17
-build:
-  stage: build
-  script: 
-    - mvn clean compile
-  artifacts:
-    paths: 
-      - target/
-
-# Test Job
-test:
-  stage: test
+verify_oidc_token:
+  stage: verify_oidc
+  image: debian:bullseye-slim  # Or any other image with jq pre-installed
   script:
-    - echo "Connecting to GCP MySQL instance..."
-    - mvn test -X
-  artifacts:
-    paths:
-      - target/  # Save compiled files and test results for the next stage
+    - apt-get update && apt-get install -y jq  # Install jq if not included in the image
+    - echo $CI_JOB_JWT | cut -d "." -f2 | base64 -d | jq '.'  # Decode the JWT and display its claims
+# image: maven:3.8.6-eclipse-temurin-17
+# build:
+#   stage: build
+#   script: 
+#     - mvn clean compile
+#   artifacts:
+#     paths: 
+#       - target/
 
-# Coverage Job
-coverage:
-  stage: coverage
-  script:
-    - echo "Generating code coverage report with JaCoCo..."
-    - mvn jacoco:report  # Generate JaCoCo coverage report
-  dependencies:
-    - test  # Use the artifacts from the test job
-  artifacts:
-    paths:
-      - target/site/jacoco/  # Save the JaCoCo report as an artifact
-    expire_in: 1 week  # Optional: Set expiration time for the artifacts
+# # Test Job
+# test:
+#   stage: test
+#   script:
+#     - echo "Connecting to GCP MySQL instance..."
+#     - mvn test -X
+#   artifacts:
+#     paths:
+#       - target/  # Save compiled files and test results for the next stage
+
+# # Coverage Job
+# coverage:
+#   stage: coverage
+#   script:
+#     - echo "Generating code coverage report with JaCoCo..."
+#     - mvn jacoco:report  # Generate JaCoCo coverage report
+#   dependencies:
+#     - test  # Use the artifacts from the test job
+#   artifacts:
+#     paths:
+#       - target/site/jacoco/  # Save the JaCoCo report as an artifact
+#     expire_in: 1 week  # Optional: Set expiration time for the artifacts
+#############################################################################################
 # stages:
 #   - build
 #   - test
