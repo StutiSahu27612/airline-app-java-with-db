@@ -1,15 +1,11 @@
 # # .gitlab-ci.yml
 
-Here's a full GitLab CI pipeline script that checks the CI_JOB_JWT environment variable, extracts and decodes the JWT token, and displays the decoded payload with proper error handling:
-
-yaml
-Copy code
 stages:
   - check-jwt
 
 check-jwt:
   stage: check-jwt
-  image: ruby:3.1 # Use the appropriate image with jq and base64
+  image: ruby:3.1  # Use the appropriate image with jq and base64
   script:
     - echo "Checking if CI_JOB_JWT is set..."
     - |
@@ -26,10 +22,9 @@ check-jwt:
           echo "Failed to decode the JWT token"
           exit 1
         fi
-      fi  
+      fi
   only:
-    - master  # or your branch of choice # Decode the JWT and display its claims
-
+    - master  # or your branch of choice
 # stages:
 #   - build
 #   - test
