@@ -1,7 +1,8 @@
-# .gitlab-ci.yml
+# # .gitlab-ci.yml
+
 
 stages:
-  - build 
+  - build
   - test
 
 # Use Maven with OpenJDK 17 from Eclipse Temurin
@@ -11,8 +12,20 @@ variables:
   DB_URL: $DB_URL
   DB_USER: $DB_USER
   DB_PASSWORD: $DB_PASSWORD
+  GCP_PROJECT_ID: maximal-brace-436007-t5
+  GCP_WORKLOAD_IDENTITY_PROVIDER: https://iam.googleapis.com/projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-app-java-wif
+  SERVICE_ACCOUNT_EMAIL: airline-app-java@maximal-brace-436007-t5.iam.gserviceaccount.com
 
-
+before_script:
+  # Install Google Cloud SDK in Maven image
+  - apt-get update && apt-get install -y apt-transport-https ca-certificates gnupg
+  - echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+  - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+  - apt-get update && apt-get install -y google-cloud-sdk
+  - gcloud auth activate-service-account $SERVICE_ACCOUNT_EMAIL --key-file=/etc/gitlab-runner/config.toml
+  - gcloud config set project $GCP_PROJECT_ID
+  - gcloud config set account $SERVICE_ACCOUNT_EMAIL
+  - gcloud config set workload-identity-provider $GCP_WORKLOAD_IDENTITY_PROVIDER
 
 # Build Job
 build:
@@ -20,12 +33,53 @@ build:
   script: 
     - mvn clean compile
   artifacts:
-    paths: 
-      - target/  
+    paths:
+      - target/
 
 # Test Job
 test:
   stage: test
   script:
     - echo "Connecting to GCP MySQL instance..."
-    - mvn test -X  
+    - mvn test -X
+# stages:
+#   - build 
+#   - test
+
+# # Use Maven with OpenJDK 17 from Eclipse Temurin
+# image: maven:3.8.6-eclipse-temurin-17
+
+# variables:
+#   DB_URL: $DB_URL
+#   DB_USER: $DB_USER
+#   DB_PASSWORD: $DB_PASSWORD
+
+# image: google/cloud-sdk:latest
+
+# variables:
+#   GCP_PROJECT_ID: your-project-id
+#   GCP_WORKLOAD_IDENTITY_PROVIDER: https://your-workload-identity-provider-url
+#   SERVICE_ACCOUNT_EMAIL: your-service-account@your-project.iam.gserviceaccount.com
+
+# before_script:
+#   - gcloud auth activate-service-account --key-file=/etc/gitlab-runner/config.toml
+#   - gcloud config set project $GCP_PROJECT_ID
+#   - gcloud config set account $SERVICE_ACCOUNT_EMAIL
+#   - gcloud config set workload-identity-provider $GCP_WORKLOAD_IDENTITY_PROVIDER
+
+
+# # Build Job
+# build:
+#   stage: build
+#   script: 
+#     - mvn clean compile
+#   artifacts:
+#     paths: 
+#       - target/  
+
+# # Test Job
+# test:
+#   stage: test
+#   script:
+#     - echo "Connecting to GCP MySQL instance..."
+#     - mvn test -X  
