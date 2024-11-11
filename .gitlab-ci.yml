@@ -17,12 +17,11 @@ variables:
   SERVICE_ACCOUNT_EMAIL: airline-app-java@maximal-brace-436007-t5.iam.gserviceaccount.com
 
 before_script:
-  # Install Google Cloud SDK in Maven image
   - apt-get update && apt-get install -y apt-transport-https ca-certificates gnupg
   - echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
   - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
   - apt-get update && apt-get install -y google-cloud-sdk
-  - gcloud auth activate-service-account $SERVICE_ACCOUNT_EMAIL --key-file=/etc/gitlab-runner/config.toml
+  - gcloud auth login --brief
   - gcloud config set project $GCP_PROJECT_ID
   - gcloud config set account $SERVICE_ACCOUNT_EMAIL
   - gcloud config set workload-identity-provider $GCP_WORKLOAD_IDENTITY_PROVIDER
