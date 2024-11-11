@@ -1,64 +1,16 @@
 # # .gitlab-ci.yml
-
-# stages:
-#   - check-jwt
-
-# check-jwt:
-#   stage: check-jwt
-#   image: ruby:3.1  # Use the appropriate image with jq and base64
-#   script:
-#     - echo "Checking if CI_JOB_JWT is set..."
-#     - |
-#       if [ -z "$CI_JOB_JWT" ]; then
-#         echo "CI_JOB_JWT is not set"
-#         exit 1
-#       else
-#         echo "CI_JOB_JWT is set, decoding the token..."
-#         DECODED_JWT=$(echo $CI_JOB_JWT | cut -d "." -f2 | base64 -d)
-#         if [ $? -eq 0 ]; then
-#           echo "Decoded JWT payload:"
-#           echo "$DECODED_JWT" | jq '.'
-#         else
-#           echo "Failed to decode the JWT token"
-#           exit 1
-#         fi
-#       fi
-#   only:
-#     - master  # or your branch of choice
 stages:
   - build
   - test
+  - coverage
 
-# Use Maven with OpenJDK 17 from Eclipse Temurin
 image: maven:3.8.6-eclipse-temurin-17
-
-variables:
-  DB_URL: $DB_URL
-  DB_USER: $DB_USER
-  DB_PASSWORD: $DB_PASSWORD
-  GCP_PROJECT_ID: maximal-brace-436007-t5
-  GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-app-java-wif"
-  SERVICE_ACCOUNT_EMAIL: airline-app-java@maximal-brace-436007-t5.iam.gserviceaccount.com
-
-
-before_script:
-  # Install Google Cloud SDK
-  - apt-get update && apt-get install -y apt-transport-https ca-certificates gnupg
-  - echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-  - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-  - apt-get update && apt-get install -y google-cloud-sdk
-  
-  # Set project and service account using the integrated Workload Identity Federation
-  - gcloud config set project $GCP_PROJECT_ID
-  - gcloud config set account $SERVICE_ACCOUNT_EMAIL
-
-# Build Job
 build:
   stage: build
   script: 
     - mvn clean compile
   artifacts:
-    paths:
+    paths: 
       - target/
 
 # Test Job
@@ -67,6 +19,64 @@ test:
   script:
     - echo "Connecting to GCP MySQL instance..."
     - mvn test -X
+  artifacts:
+    paths:
+      - target/  # Save compiled files and test results for the next stage
+
+# Coverage Job
+coverage:
+  stage: coverage
+  script:
+    - echo "Generating code coverage report with JaCoCo..."
+    - mvn jacoco:report  # Generate JaCoCo coverage report
+  dependencies:
+    - test  # Use the artifacts from the test job
+  artifacts:
+    paths:
+      - target/site/jacoco/  # Save the JaCoCo report as an artifact
+    expire_in: 1 week  # Optional: Set expiration time for the artifacts
+# stages:
+#   - build
+#   - test
+
+# # Use Maven with OpenJDK 17 from Eclipse Temurin
+# image: maven:3.8.6-eclipse-temurin-17
+
+# variables:
+#   DB_URL: $DB_URL
+#   DB_USER: $DB_USER
+#   DB_PASSWORD: $DB_PASSWORD
+#   GCP_PROJECT_ID: maximal-brace-436007-t5
+#   GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-app-java-wif"
+#   SERVICE_ACCOUNT_EMAIL: airline-app-java@maximal-brace-436007-t5.iam.gserviceaccount.com
+
+
+# before_script:
+#   # Install Google Cloud SDK
+#   - apt-get update && apt-get install -y apt-transport-https ca-certificates gnupg
+#   - echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+#   - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+#   - apt-get update && apt-get install -y google-cloud-sdk
+  
+#   # Set project and service account using the integrated Workload Identity Federation
+#   - gcloud config set project $GCP_PROJECT_ID
+#   - gcloud config set account $SERVICE_ACCOUNT_EMAIL
+
+# # Build Job
+# build:
+#   stage: build
+#   script: 
+#     - mvn clean compile
+#   artifacts:
+#     paths:
+#       - target/
+
+# # Test Job
+# test:
+#   stage: test
+#   script:
+#     - echo "Connecting to GCP MySQL instance..."
+#     - mvn test -X
 
 #######################################################
 # stages:

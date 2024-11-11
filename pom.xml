@@ -63,6 +63,20 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.7</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal> <!-- This is to attach JaCoCo to the JVM -->
+							<goal>report</goal> <!-- This goal generates the code coverage report -->
+						</goals>
+						<phase>test</phase> <!-- Bind to the test phase -->
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
