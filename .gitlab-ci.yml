@@ -15,17 +15,27 @@ variables:
   GCP_PROJECT_ID: maximal-brace-436007-t5
   GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-app-java-wif"
   SERVICE_ACCOUNT_EMAIL: airline-app-java@maximal-brace-436007-t5.iam.gserviceaccount.com
+  GCP_AUDIENCE: https://iam.googleapis.com/projects/maximal-brace-436007-t5/serviceAccounts/airline-app-java@maximal-brace-436007-t5.iam.gserviceaccount.com
+  GCP_TOKEN_URL: https://sts.googleapis.com/v1/token
 
 before_script:
   - apt-get update && apt-get install -y apt-transport-https ca-certificates gnupg
   - echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
   - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
   - apt-get update && apt-get install -y google-cloud-sdk
-  - gcloud auth login --brief
+  
+  # Authenticate using Workload Identity Federation
+  - gcloud auth login --brief --no-launch-browser  # This is optional; can be removed for WIF
+  
+  # This will authenticate using Workload Identity Federation (WIF)
+  - gcloud auth activate-service-account --workload-identity-provider=$GCP_WORKLOAD_IDENTITY_PROVIDER \
+                                         --audiences=$GCP_AUDIENCE \
+                                         --token-url=$GCP_TOKEN_URL
+  
+  # Set your Google Cloud project, account, and Workload Identity Provider
   - gcloud config set project $GCP_PROJECT_ID
-  - gcloud config set account $SERVICE_ACCOUNT_EMAIL
+  - gcloud config set account $SERVICE_ACCOUNT_EMAIL  # Optional if using the WIF identity
   - gcloud config set workload-identity-provider $GCP_WORKLOAD_IDENTITY_PROVIDER
-
 # Build Job
 build:
   stage: build
