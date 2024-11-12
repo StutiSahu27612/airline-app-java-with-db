@@ -60,7 +60,8 @@ variables:
   GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID: "maximal-brace-436007-t5"
   GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME: "airlineapp-java-repository"
 
-
+# include:
+#   - template: Jobs/Secret-Detection.gitlab-ci.yml  # Include the secret detection job
 # Build Job
 build:
   stage: build
@@ -97,6 +98,7 @@ deploy:
     - build
 
 include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
   - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@main
     inputs:
       stage: deploy
@@ -104,7 +106,8 @@ include:
       target: $GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION-docker.pkg.dev/$GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID/$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
       
 
-
+secret_detection:
+  stage: secret_detection  # This is the secret detection job from the template
 
 
 
