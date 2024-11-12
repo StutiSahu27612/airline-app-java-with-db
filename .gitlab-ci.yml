@@ -35,8 +35,9 @@
 #   artifacts:
 #     paths:
 #       - target/site/jacoco/  # Save the JaCoCo report as an artifact
-#     expire_in: 1 week  # Optional: Set expiration time for the artifacts
+#   allow_failure: true  # Optional step , it will let you to continue even if coverage failsif you want the pipeline to continue even if coverage fails
 #############################################################################################
+
 stages:
   - build
   - test
