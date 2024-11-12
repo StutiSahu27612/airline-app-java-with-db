@@ -49,12 +49,17 @@ stages:
   - build
   - test
   - push
+  - deploy 
 
 # Use Maven with OpenJDK 17 from Eclipse Temurin
 image: maven:3.8.6-eclipse-temurin-17
 
 variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+  GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION: "us-central1"  
+  GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID: "maximal-brace-436007-t5"
+  GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME: "airlineapp-java-repository"
+
 
 # Build Job
 build:
@@ -84,6 +89,20 @@ push:
     - docker build -t $IMAGE_TAG .
     - docker push $IMAGE_TAG
 
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploy stage"
+  needs:
+    - build
+
+include:
+  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@master
+    inputs:
+      stage: deploy
+      source: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+      target: $GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION-docker.pkg.dev/$GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID/$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+      
 
 
 
