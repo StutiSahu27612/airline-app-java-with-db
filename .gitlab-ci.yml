@@ -41,11 +41,13 @@
 stages:
   - build
   - test
+  - push
  
 # Use Maven with OpenJDK 17 from Eclipse Temurin
 image: maven:3.8.6-eclipse-temurin-17
 
 variables:
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
   DB_URL: $DB_URL
   DB_USER: $DB_USER
   DB_PASSWORD: $DB_PASSWORD
@@ -90,6 +92,16 @@ test:
   script:
     - echo "Connecting to GCP MySQL instance..."
     - mvn test -X
+
+
+push:
+  stage: build
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" --password-stdin
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+
+
 
 #######################################################
 # stages:
