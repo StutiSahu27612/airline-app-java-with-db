@@ -50,6 +50,7 @@ stages:
   - test
   - push
   - deploy 
+  - secret_detection
 
 # Use Maven with OpenJDK 17 from Eclipse Temurin
 image: maven:3.8.6-eclipse-temurin-17
