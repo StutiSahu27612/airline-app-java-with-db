@@ -70,7 +70,7 @@ before_script:
   #   # Authenticate using Workload Identity Federation (WIF)
   # - gcloud auth login --enable-gdrive-access --impersonate-service-account=$SERVICE_ACCOUNT_EMAIL --allow-local-impersonation --workload-identity-federation
 
-# Build Job
+# Build Job 
 build:
   stage: build
   script: 
