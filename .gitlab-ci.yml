@@ -97,7 +97,7 @@ deploy:
     - build
 
 include:
-  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@master
+  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@main
     inputs:
       stage: deploy
       source: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
