@@ -13,7 +13,7 @@ public class Flight {
     private String source;
     private String Destination;
     private Double ticketPrice;
-     private String apiKey = "s3cr3tAp1k3y123"; 
+    private String apiKey = "s3cr3tAp1k3y123"; 
 
     public Flight(){}
 
