@@ -61,8 +61,17 @@ variables:
   GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID: "maximal-brace-436007-t5"
   GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME: "airlineapp-java-repository"
 
-# include:
-#   - template: Jobs/Secret-Detection.gitlab-ci.yml  # Include the secret detection job
+
+include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@main
+    inputs:
+      stage: deploy
+      source: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+      target: $GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION-docker.pkg.dev/$GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID/$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+
+
+
 # Build Job
 build:
   stage: build
@@ -78,7 +87,7 @@ test:
   script:
     - mvn test -X
 
-# Push Docker image
+# Push Docker image to Gitlab Container registry 
 push:
   stage: push
   image: docker:20.10.7  # Using  Docker image for this stage
@@ -91,6 +100,7 @@ push:
     - docker build -t $IMAGE_TAG .
     - docker push $IMAGE_TAG
 
+#Push Docker Image to GCP's Artifact Registry 
 deploy:
   stage: deploy
   script:
@@ -98,13 +108,13 @@ deploy:
   needs:
     - build
 
-include:
-  - template: Jobs/Secret-Detection.gitlab-ci.yml
-  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@main
-    inputs:
-      stage: deploy
-      source: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
-      target: $GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION-docker.pkg.dev/$GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID/$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+# include:
+#   - template: Jobs/Secret-Detection.gitlab-ci.yml
+#   - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@main
+#     inputs:
+#       stage: deploy
+#       source: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+#       target: $GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION-docker.pkg.dev/$GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID/$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
       
 
 secret_detection:
