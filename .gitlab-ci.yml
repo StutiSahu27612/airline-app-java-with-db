@@ -39,23 +39,33 @@
 #############################################################################################
 
 
+
 stages:
   - test_wif
+
   - build
   - test
   - push
-  - deploy 
+  - deploy
   - secret_detection
 
-
-image: maven:3.8.6-eclipse-temurin-17 #I am using maven image with openjdk 17 
+image: maven:3.8.6-eclipse-temurin-17 # Default image for Maven with OpenJDK 17
 
 variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
-  GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION: "us-central1"  
+  GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION: "us-central1"
   GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID: "maximal-brace-436007-t5"
   GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME: "airlineapp-java-repository"
 
+# Global before_script running on Ubuntu
+.before_script_ubuntu:
+  image: ubuntu:22.04
+  script:
+    - echo "Running global before_script on Ubuntu"
+    - apt-get update && apt-get install -y curl
+    - curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64
+    - chmod +x cloud-sql-proxy
+    ./cloud-sql-proxy maximal-brace-436007-t5:us-central1:instance-airline &
 
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
@@ -65,24 +75,18 @@ include:
       source: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
       target: $GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION-docker.pkg.dev/$GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID/$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
 
-test_wif:
-  stage: test_wif
-  image: google/cloud-sdk:slim  # Use Google Cloud SDK image to access gcloud
-  script:
-    - echo "Authenticating to GCP with WIF..."
-    - gcloud iam service-accounts list --project=maximal-brace-436007-t5
-    # - gcloud auth configure-docker us-central1-docker.pkg.dev
-   
-    # - REGION="us-central1"  # Set your Artifact Registry region
-    # - REPOSITORY_NAME="airlineapp-java-repository"  # Set your repository name
-    # # List packages in the specified Artifact Registry repository
-    # - echo "Listing packages in Artifact Registry..."
-    # - gcloud artifacts packages list --repository=$REPOSITORY_NAME --location=$REGION
+# test_wif:
+#   stage: test_wif
+#   image: ubuntu:22.04
+#   extends: .before_script_ubuntu
+#   script:
+#     - 
 
 # Build Job
 build:
   stage: build
-  script: 
+  extends: .before_script_ubuntu
+  script:
     - mvn clean package  # This will create the JAR file in the target directory
   artifacts:
     paths:
@@ -91,29 +95,105 @@ build:
 # Test Job
 test:
   stage: test
+  extends: .before_script_ubuntu
   script:
     - mvn test -X
 
-# Push Docker image to Gitlab Container registry 
+# Push Docker image to GitLab Container registry
 push:
   stage: push
-  image: docker:20.10.7  # Using  Docker image for this stage
+  image: docker:20.10.7
   services:
-    - docker:20.10.7-dind 
-  # variables:
-  #   DOCKER_TLS_CERTDIR: ""  
+    - docker:20.10.7-dind
+  extends: .before_script_ubuntu
   script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" --password-stdin
     - docker build -t $IMAGE_TAG .
     - docker push $IMAGE_TAG
 
-#Push Docker Image to GCP's Artifact Registry 
+# Deploy to GCP's Artifact Registry
 deploy:
   stage: deploy
+  extends: .before_script_ubuntu
   script:
     - echo "Deploy stage"
   needs:
     - build
+
+secret_detection:
+  stage: secret_detection
+  extends: .before_script_ubuntu
+  script:
+    - echo "Running secret detection"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# stages:
+  
+#   - test_wif
+#   - build
+#   - test
+#   - push
+#   - deploy 
+#   - secret_detection
+  
+
+
+# image: maven:3.8.6-eclipse-temurin-17 #I am using maven image with openjdk 17 
+
+# variables:
+#   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+#   GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION: "us-central1"  
+#   GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID: "maximal-brace-436007-t5"
+#   GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME: "airlineapp-java-repository"
+
+# before_script:
+#   - echo "Running global before_script"
+#   - curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64
+#   - chmod +x cloud-sql-proxy
+
 
 # include:
 #   - template: Jobs/Secret-Detection.gitlab-ci.yml
@@ -122,10 +202,61 @@ deploy:
 #       stage: deploy
 #       source: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
 #       target: $GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION-docker.pkg.dev/$GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID/$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+
+# # test_wif:
+# #   stage: test_wif
+# #   image: ubuntu:22.04  # Use Google Cloud SDK image to access gcloud
+# #   script:
+# #     - curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64
+# #     - chmod +x cloud-sql-proxy
+#     - 
+# # Build Job
+# build:
+#   stage: build
+#   script: 
+#     - mvn clean package  # This will create the JAR file in the target directory
+#   artifacts:
+#     paths:
+#       - target/airline-app.jar  # Make sure the JAR is available for later stages
+
+# # Test Job
+# test:
+#   stage: test
+#   script:
+#     - mvn test -X
+
+# # Push Docker image to Gitlab Container registry 
+# push:
+#   stage: push
+#   image: docker:20.10.7  # Using  Docker image for this stage
+#   services:
+#     - docker:20.10.7-dind 
+#   # variables:
+#   #   DOCKER_TLS_CERTDIR: ""  
+#   script:
+#     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" --password-stdin
+#     - docker build -t $IMAGE_TAG .
+#     - docker push $IMAGE_TAG
+
+# #Push Docker Image to GCP's Artifact Registry 
+# deploy:
+#   stage: deploy
+#   script:
+#     - echo "Deploy stage"
+#   needs:
+#     - build
+
+# # include:
+# #   - template: Jobs/Secret-Detection.gitlab-ci.yml
+# #   - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@main
+# #     inputs:
+# #       stage: deploy
+# #       source: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+# #       target: $GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION-docker.pkg.dev/$GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID/$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
       
 
-secret_detection:
-  stage: secret_detection  # This is the secret detection job from the template
+# secret_detection:
+#   stage: secret_detection  # This is the secret detection job from the template
 
 
 
