@@ -74,9 +74,9 @@ setup_proxy:
   script:
     # Authenticate using Workload Identity Federation (WIF)
     - echo "Configuring Workload Identity Federation"
-    - gcloud config set project $GOOGLE_PROJECT_ID
-    - gcloud auth login --brief --provider=$GOOGLE_WORKLOAD_IDENTITY_PROVIDER \
-      --service-account=$GOOGLE_SERVICE_ACCOUNT_EMAIL
+    - gcloud config set project maximal-brace-436007-t5
+    - gcloud auth login --brief --provider=airlineapp-provider \
+      --service-account=java-app-sa@maximal-brace-436007-t5.iam.gserviceaccount.com
     # Download Cloud SQL Proxy and start it
     - curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64
     - chmod +x cloud-sql-proxy
