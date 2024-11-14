@@ -65,7 +65,7 @@ variables:
     - apt-get update && apt-get install -y curl
     - curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64
     - chmod +x cloud-sql-proxy
-    ./cloud-sql-proxy maximal-brace-436007-t5:us-central1:instance-airline &
+    - ./cloud-sql-proxy maximal-brace-436007-t5:us-central1:instance-airline &
 
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
