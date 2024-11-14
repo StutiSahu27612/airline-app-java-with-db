@@ -70,13 +70,14 @@ test_wif:
   image: google/cloud-sdk:slim  # Use Google Cloud SDK image to access gcloud
   script:
     - echo "Authenticating to GCP with WIF..."
-    - gcloud auth configure-docker us-central1-docker.pkg.dev
+    - gcloud iam service-accounts list --project=maximal-brace-436007-t5
+    # - gcloud auth configure-docker us-central1-docker.pkg.dev
    
-    - REGION="us-central1"  # Set your Artifact Registry region
-    - REPOSITORY_NAME="airlineapp-java-repository"  # Set your repository name
-    # List packages in the specified Artifact Registry repository
-    - echo "Listing packages in Artifact Registry..."
-    - gcloud artifacts packages list --repository=$REPOSITORY_NAME --location=$REGION
+    # - REGION="us-central1"  # Set your Artifact Registry region
+    # - REPOSITORY_NAME="airlineapp-java-repository"  # Set your repository name
+    # # List packages in the specified Artifact Registry repository
+    # - echo "Listing packages in Artifact Registry..."
+    # - gcloud artifacts packages list --repository=$REPOSITORY_NAME --location=$REGION
 
 # Build Job
 build:
