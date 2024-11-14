@@ -42,7 +42,6 @@
 
 stages:
   - test_wif
-
   - build
   - test
   - push
@@ -59,7 +58,7 @@ variables:
 
 # Global before_script running on Ubuntu
 .before_script_ubuntu:
-  image: ubuntu:22.04
+  # image: ubuntu:22.04
   script:
     - echo "Running global before_script on Ubuntu"
     - apt-get update && apt-get install -y curl
