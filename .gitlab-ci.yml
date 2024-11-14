@@ -70,19 +70,21 @@ variables:
 
 setup_proxy:
   stage: setup_proxy
-  image: ubuntu:22.04
+  image: google/cloud-sdk:slim
   script:
-    - echo "Running setup_proxy stage on Ubuntu"
-    - apt-get update && apt-get install -y curl
+    # Authenticate using Workload Identity Federation (WIF)
+    - echo "Configuring Workload Identity Federation"
+    - gcloud config set project $GOOGLE_PROJECT_ID
+    - gcloud auth login --brief --provider=$GOOGLE_WORKLOAD_IDENTITY_PROVIDER \
+      --service-account=$GOOGLE_SERVICE_ACCOUNT_EMAIL
+    # Download Cloud SQL Proxy and start it
     - curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64
     - chmod +x cloud-sql-proxy
-    # Run Cloud SQL Proxy in the background with the correct instance connection and port forwarding
-    - ./cloud-sql-proxy $GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID:$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION:instance-airline=tcp:3306 > cloud_sql_proxy.log 2>&1 &
-    # Give the proxy a moment to establish the connection
+    # Run Cloud SQL Proxy with the instance connection details
+    - ./cloud-sql-proxy $GOOGLE_PROJECT_ID:$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION:instance-airline=tcp:3306 > cloud_sql_proxy.log 2>&1 &
     - sleep 5
-    # Check if the proxy process is running
+    # Verify Cloud SQL Proxy is running
     - ps aux | grep cloud-sql-proxy
-    # Output the log to confirm connection success
     - cat cloud_sql_proxy.log
     
 
