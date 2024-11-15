@@ -17,7 +17,7 @@ FEDERATED_TOKEN="$(curl --fail "https://sts.googleapis.com/v1/token" \
   | jq -r '.access_token'
 )"
 
-ACCESS_TOKEN="$(curl --fail "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/SERVICE_ACCOUNT_EMAIL:generateAccessToken" \
+ACCESS_TOKEN="$(curl --fail "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/java-app-sa@maximal-brace-436007-t5.iam.gserviceaccount.com:generateAccessToken" \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
   --header "Authorization: Bearer ${FEDERATED_TOKEN}" \
