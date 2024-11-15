@@ -75,7 +75,7 @@ variables:
 
 setup_proxy:
   stage: setup_proxy
-  image: ubuntu:22.04
+  image: dwdraju/alpine-curl-jq
   script: 
     - chmod +x ./get_credentials.sh 
     - ./get_credentials.sh 
