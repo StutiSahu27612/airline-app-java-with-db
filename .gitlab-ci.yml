@@ -54,8 +54,13 @@ image: maven:3.8.6-eclipse-temurin-17 # Default image for Maven with OpenJDK 17
 variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
   GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION: "us-central1"
-  GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID: "maximal-brace-436007-t5"
+  GOOGLE_CLOUD_PROJECT_ID: "maximal-brace-436007-t5"
   GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME: "airlineapp-java-repository"
+  CLOUD_SQL_CONNECTION_NAME: "" # e.g., "project:region:instance"
+  GCP_PROJECT_ID: maximal-brace-436007-t5
+  WORKLOAD_IDENTITY_POOL: airline-javaapp-pool
+  GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-javaapp-pool"
+  GOOGLE_SERVICE_ACCOUNT_EMAIL: java-app-sa@maximal-brace-436007-t5.iam.gserviceaccount.com
 
 # Global before_script running on Ubuntu
 .before_script_ubuntu:
@@ -72,20 +77,36 @@ setup_proxy:
   stage: setup_proxy
   image: google/cloud-sdk:slim
   script:
+  - gcloud auth login --update-adc \
+      --workload_identity_pool=projects/${GCP_PROJECT_ID}/locations/global/workloadIdentityPools/WORKLOAD_IDENTITY_POOL \
+      --workload_identity_provider=projects/${GCP_PROJECT_ID}/locations/global/workloadIdentityPools/WORKLOAD_IDENTITY_POOL/providers/airlineapp-provider \
+      --service_account=$GOOGLE_SERVICE_ACCOUNT_EMAIL
+   - curl -o cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+   - chmod +x cloud_sql_proxy
+     
+  # Start Cloud SQL Proxy using Workload Identity Federation
+   - ./cloud_sql_proxy -instances=$CLOUD_SQL_CONNECTION_NAME=tcp:3306 -enable_iam_auth &
+
+
+gcloud auth login --update-adc \
+      --workload_identity_pool=projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-javaapp-pool \
+      --workload_identity_provider=projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-javaapp-pool/providers/airlineapp-provider \
+      --service_account=maximal-brace-436007-t5
+   
     # Authenticate using Workload Identity Federation (WIF)
-    - echo "Configuring Workload Identity Federation"
-    - gcloud config set project maximal-brace-436007-t5
-    - gcloud auth login --brief --provider=airlineapp-provider \
-      --service-account=java-app-sa@maximal-brace-436007-t5.iam.gserviceaccount.com
-    # Download Cloud SQL Proxy and start it
-    - curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64
-    - chmod +x cloud-sql-proxy
-    # Run Cloud SQL Proxy with the instance connection details
-    - ./cloud-sql-proxy $GOOGLE_PROJECT_ID:$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION:instance-airline=tcp:3306 > cloud_sql_proxy.log 2>&1 &
-    - sleep 5
-    # Verify Cloud SQL Proxy is running
-    - ps aux | grep cloud-sql-proxy
-    - cat cloud_sql_proxy.log
+    # - echo "Configuring Workload Identity Federation"
+    # - gcloud config set project maximal-brace-436007-t5
+    # - gcloud auth login --brief --provider=airlineapp-provider \
+    #   --service-account=java-app-sa@maximal-brace-436007-t5.iam.gserviceaccount.com
+    # # Download Cloud SQL Proxy and start it
+    # - curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64
+    # - chmod +x cloud-sql-proxy
+    # # Run Cloud SQL Proxy with the instance connection details
+    # - ./cloud-sql-proxy $GOOGLE_PROJECT_ID:$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION:instance-airline=tcp:3306 > cloud_sql_proxy.log 2>&1 &
+    # - sleep 5
+    # # Verify Cloud SQL Proxy is running
+    # - ps aux | grep cloud-sql-proxy
+    # - cat cloud_sql_proxy.log
     
 
 include:
