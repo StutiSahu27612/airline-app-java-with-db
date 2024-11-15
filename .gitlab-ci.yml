@@ -75,14 +75,16 @@ variables:
 
 setup_proxy:
   stage: setup_proxy
-  image: google/cloud-sdk:slim
-  script:
+  image: ubuntu:22.04
+  script: 
+    - chmod +x ./get_credentials.sh 
+    - ./get_credentials.sh 
  
-   - curl -o cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
-   - chmod +x cloud_sql_proxy
+  #  - curl -o cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+  #  - chmod +x cloud_sql_proxy
      
   
-   - ./cloud_sql_proxy -instances=$CLOUD_SQL_CONNECTION_NAME=tcp:3306 -enable_iam_auth &
+  #  - ./cloud_sql_proxy -instances=$CLOUD_SQL_CONNECTION_NAME=tcp:3306 -enable_iam_auth &
 
 
    
