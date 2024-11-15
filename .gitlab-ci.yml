@@ -56,7 +56,7 @@ variables:
   GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION: "us-central1"
   GOOGLE_CLOUD_PROJECT_ID: "maximal-brace-436007-t5"
   GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME: "airlineapp-java-repository"
-  CLOUD_SQL_CONNECTION_NAME: "" # e.g., "project:region:instance"
+  CLOUD_SQL_CONNECTION_NAME: "maximal-brace-436007-t5:us-central1:instance-airline" # e.g., "project:region:instance"
   GCP_PROJECT_ID: maximal-brace-436007-t5
   WORKLOAD_IDENTITY_POOL: airline-javaapp-pool
   GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-javaapp-pool"
@@ -77,21 +77,14 @@ setup_proxy:
   stage: setup_proxy
   image: google/cloud-sdk:slim
   script:
-  - gcloud auth login --update-adc \
-      --workload_identity_pool=projects/${GCP_PROJECT_ID}/locations/global/workloadIdentityPools/WORKLOAD_IDENTITY_POOL \
-      --workload_identity_provider=projects/${GCP_PROJECT_ID}/locations/global/workloadIdentityPools/WORKLOAD_IDENTITY_POOL/providers/airlineapp-provider \
-      --service_account=$GOOGLE_SERVICE_ACCOUNT_EMAIL
+ 
    - curl -o cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
    - chmod +x cloud_sql_proxy
      
-  # Start Cloud SQL Proxy using Workload Identity Federation
+  
    - ./cloud_sql_proxy -instances=$CLOUD_SQL_CONNECTION_NAME=tcp:3306 -enable_iam_auth &
 
 
-gcloud auth login --update-adc \
-      --workload_identity_pool=projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-javaapp-pool \
-      --workload_identity_provider=projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-javaapp-pool/providers/airlineapp-provider \
-      --service_account=maximal-brace-436007-t5
    
     # Authenticate using Workload Identity Federation (WIF)
     # - echo "Configuring Workload Identity Federation"
