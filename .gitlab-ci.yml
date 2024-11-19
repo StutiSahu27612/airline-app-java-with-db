@@ -75,7 +75,11 @@ sonar:
   script: 
     # - mvn verify sonar:sonar -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK
     # - Dsonar.jacoco.reportPaths=target/jacoco.exec
-      - Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK Dsonar.host.url=http://34.27.107.36:9000 Dsonar.login=$SONAR_TOKEN Dsonar.jacoco.reportPaths=target/jacoco.exec
+      - mvn verify sonar:sonar \
+          -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK \
+          -Dsonar.host.url=http://34.27.107.36:9000 \
+          -Dsonar.login=$SONAR_TOKEN \
+          -Dsonar.jacoco.reportPaths=target/jacoco.exec
 
   allow_failure: true
   only:
