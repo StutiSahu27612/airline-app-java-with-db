@@ -46,6 +46,7 @@ test:
   artifacts:
     paths:
       - target/  # Save compiled files and test results for the next stage
+      - target/site/jacoco/   # Save compiled files and test results for the next stage
 
 # sonar:
 #   stage: sonar
@@ -60,23 +61,53 @@ test:
 #     - master 
 #     - develop
 
+# sonar:
+#   stage: sonar
+#   image: maven:3.8.6-eclipse-temurin-17
+#   variables:
+#     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+#     GIT_DEPTH: "0"  # Tells git to fetch all branches
+#     # GIT_STRATEGY: none  # Prevents GitLab from automatically checking out the repository
+#   cache:
+#     key: "${CI_JOB_NAME}"
+#     paths:
+#       - .sonar/cache
+#   script: 
+#     - mvn verify sonar:sonar -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK
+#   allow_failure: true
+#   only:
+#     - master
+
+# test:
+#   stage: test
+#   script:
+#     - echo "Running tests and generating coverage report..."
+#     - mvn clean test
+#   artifacts:
+#     paths:
+#       - target/  # Save compiled files and test results for the next stage
+#       - target/site/jacoco/  # Save JaCoCo coverage reports
+
+# SonarQube Analysis Job
 sonar:
   stage: sonar
   image: maven:3.8.6-eclipse-temurin-17
   variables:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
     GIT_DEPTH: "0"  # Tells git to fetch all branches
-    # GIT_STRATEGY: none  # Prevents GitLab from automatically checking out the repository
   cache:
     key: "${CI_JOB_NAME}"
     paths:
       - .sonar/cache
-  script: 
-    - mvn verify sonar:sonar -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK
+  script:
+    - mvn verify sonar:sonar \
+        -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK \
+        -Dsonar.host.url=http://34.27.107.36:9000 \
+        -Dsonar.login=$SONAR_TOKEN \
+        -Dsonar.jacoco.reportPaths=target/jacoco.exec  # Ensure the coverage report is passed to SonarQube
   allow_failure: true
   only:
     - master
-
     
 
 
