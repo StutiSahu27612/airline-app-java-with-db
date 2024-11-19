@@ -15,7 +15,6 @@
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>
-		<sonar.host.url>http://34.27.107.36:9000/</sonar.host.url>
 	</properties>
 	<dependencies>
 
