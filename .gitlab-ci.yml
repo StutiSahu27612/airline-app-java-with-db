@@ -7,8 +7,8 @@ stages:
 
 variables:
   # SONAR_HOST_URL: "http://34.27.107.36:9000/"
-  SONAR_LOGIN: "sqp_1ca140afbef2c2c2d5e269943285216566df7e84"
-  MAVEN_CLI_OPTS: "-Dmaven.test.failure.ignore=true"
+  # SONAR_LOGIN: "sqp_1ca140afbef2c2c2d5e269943285216566df7e84"
+  # MAVEN_CLI_OPTS: "-Dmaven.test.failure.ignore=true"
 
 # sonarqube-check:
 #   image: maven:3.8.6-eclipse-temurin-17
@@ -54,7 +54,7 @@ sonar:
     - mvn clean verify sonar:sonar \
       -Dsonar.projectKey=Java-airline-app \
       -Dsonar.host.url=http://34.27.107.36:9000 \
-      -Dsonar.login=$SONAR_LOGIN
+      -Dsonar.login=sqp_1ca140afbef2c2c2d5e269943285216566df7e84
   only:
     - main
     - master 
