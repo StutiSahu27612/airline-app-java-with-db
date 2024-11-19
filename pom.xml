@@ -24,7 +24,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
+        
 <!--		Helps to access database using spring data JPA-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -63,6 +63,11 @@
 					<target>17</target>
 				</configuration>
 			</plugin>
+			<plugin>
+               <groupId>org.sonarsource.scanner.maven</groupId>
+               <artifactId>sonar-maven-plugin</artifactId>
+               <version>3.9.1.2184</version>
+            </plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
