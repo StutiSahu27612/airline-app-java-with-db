@@ -1,9 +1,25 @@
 # # .gitlab-ci.yml
-# stages:
-#   - build
+stages:
+  - sonarqube-check
 #   - test
 #   - coverage
 
+
+sonarqube-check:
+  image: maven:3.6.3-jdk-11
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all branches
+    GIT_STRATEGY: none  # Prevents GitLab from automatically checking out the repository
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - mvn verify sonar:sonar -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK
+  allow_failure: true
+  only:
+    - master
 
 # image: maven:3.8.6-eclipse-temurin-17
 # build:
@@ -41,8 +57,6 @@
 
 
 stages:
-  - setup_proxy
-  - test_wif
   - build
   - test
   - push
@@ -51,34 +65,34 @@ stages:
 
 image: maven:3.8.6-eclipse-temurin-17 # Default image for Maven with OpenJDK 17
 
-variables:
-  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
-  GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION: "us-central1"
-  GOOGLE_CLOUD_PROJECT_ID: "maximal-brace-436007-t5"
-  GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME: "airlineapp-java-repository"
-  CLOUD_SQL_CONNECTION_NAME: "maximal-brace-436007-t5:us-central1:instance-airline" # e.g., "project:region:instance"
-  GCP_PROJECT_ID: maximal-brace-436007-t5
-  WORKLOAD_IDENTITY_POOL: airline-javaapp-pool
-  GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-javaapp-pool"
-  GOOGLE_SERVICE_ACCOUNT_EMAIL: java-app-sa@maximal-brace-436007-t5.iam.gserviceaccount.com
+# variables:
+  # IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+  # GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION: "us-central1"
+  # GOOGLE_CLOUD_PROJECT_ID: "maximal-brace-436007-t5"
+  # GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME: "airlineapp-java-repository"
+  # CLOUD_SQL_CONNECTION_NAME: "maximal-brace-436007-t5:us-central1:instance-airline" # e.g., "project:region:instance"
+  # GCP_PROJECT_ID: maximal-brace-436007-t5
+  # WORKLOAD_IDENTITY_POOL: airline-javaapp-pool
+  # GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/maximal-brace-436007-t5/locations/global/workloadIdentityPools/airline-javaapp-pool"
+  # GOOGLE_SERVICE_ACCOUNT_EMAIL: java-app-sa@maximal-brace-436007-t5.iam.gserviceaccount.com
 
 # Global before_script running on Ubuntu
-.before_script_ubuntu:
-  # image: ubuntu:22.04
-  script:
-    - echo "Running global before_script on Ubuntu"
-    - apt-get update && apt-get install -y curl
-    - curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64
-    - chmod +x cloud-sql-proxy
-    - ./cloud-sql-proxy maximal-brace-436007-t5:us-central1:instance-airline &
+# .before_script_ubuntu:
+#   # image: ubuntu:22.04
+#   script:
+#     - echo "Running global before_script on Ubuntu"
+#     - apt-get update && apt-get install -y curl
+#     - curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.0/cloud-sql-proxy.linux.amd64
+#     - chmod +x cloud-sql-proxy
+#     - ./cloud-sql-proxy maximal-brace-436007-t5:us-central1:instance-airline &
 
 
-setup_proxy:
-  stage: setup_proxy
-  image: dwdraju/alpine-curl-jq
-  script: 
-    - chmod +x ./get_credentials.sh 
-    - ./get_credentials.sh 
+# setup_proxy:
+#   stage: setup_proxy
+#   image: dwdraju/alpine-curl-jq
+#   script: 
+#     - chmod +x ./get_credentials.sh 
+#     - ./get_credentials.sh 
  
   #  - curl -o cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
   #  - chmod +x cloud_sql_proxy
@@ -104,13 +118,13 @@ setup_proxy:
     # - cat cloud_sql_proxy.log
     
 
-include:
-  - template: Jobs/Secret-Detection.gitlab-ci.yml
-  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@main
-    inputs:
-      stage: deploy
-      source: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
-      target: $GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION-docker.pkg.dev/$GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID/$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+# include:
+#   - template: Jobs/Secret-Detection.gitlab-ci.yml
+#   - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@main
+#     inputs:
+#       stage: deploy
+#       source: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+#       target: $GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION-docker.pkg.dev/$GOOGLE_ARTIFACT_REGISTRY_PROJECT_ID/$GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_NAME/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
 
 # test_wif:
 #   stage: test_wif
@@ -120,48 +134,48 @@ include:
 #     - 
 
 # Build Job
-build:
-  stage: build
-  extends: .before_script_ubuntu
-  script:
-    - mvn clean package  # This will create the JAR file in the target directory
-  artifacts:
-    paths:
-      - target/airline-app.jar  # Make sure the JAR is available for later stages
+# build:
+#   stage: build
+#   # extends: .before_script_ubuntu
+#   script:
+#     - mvn clean package  # This will create the JAR file in the target directory
+#   artifacts:
+#     paths:
+#       - target/airline-app.jar  # Make sure the JAR is available for later stages
 
-# Test Job
-test:
-  stage: test
-  extends: .before_script_ubuntu
-  script:
-    - mvn test -X
+# # Test Job
+# test:
+#   stage: test
+#   extends: .before_script_ubuntu
+#   script:
+#     - mvn test -X
 
-# Push Docker image to GitLab Container registry
-push:
-  stage: push
-  image: docker:20.10.7
-  services:
-    - docker:20.10.7-dind
-  extends: .before_script_ubuntu
-  script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" --password-stdin
-    - docker build -t $IMAGE_TAG .
-    - docker push $IMAGE_TAG
+# # Push Docker image to GitLab Container registry
+# push:
+#   stage: push
+#   image: docker:20.10.7
+#   services:
+#     - docker:20.10.7-dind
+#   extends: .before_script_ubuntu
+#   script:
+#     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" --password-stdin
+#     - docker build -t $IMAGE_TAG .
+#     - docker push $IMAGE_TAG
 
-# Deploy to GCP's Artifact Registry
-deploy:
-  stage: deploy
-  extends: .before_script_ubuntu
-  script:
-    - echo "Deploy stage"
-  needs:
-    - build
+# # Deploy to GCP's Artifact Registry
+# deploy:
+#   stage: deploy
+#   extends: .before_script_ubuntu
+#   script:
+#     - echo "Deploy stage"
+#   needs:
+#     - build
 
-secret_detection:
-  stage: secret_detection
-  extends: .before_script_ubuntu
-  script:
-    - echo "Running secret detection"
+# secret_detection:
+#   stage: secret_detection
+#   extends: .before_script_ubuntu
+#   script:
+#     - echo "Running secret detection"
 
 
 
