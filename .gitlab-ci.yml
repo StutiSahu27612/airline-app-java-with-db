@@ -10,7 +10,7 @@ sonarqube-check:
   variables:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
     GIT_DEPTH: "0"  # Tells git to fetch all branches
-    GIT_STRATEGY: none  # Prevents GitLab from automatically checking out the repository
+    # GIT_STRATEGY: none  # Prevents GitLab from automatically checking out the repository
   cache:
     key: "${CI_JOB_NAME}"
     paths:
