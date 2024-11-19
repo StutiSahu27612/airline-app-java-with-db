@@ -1,46 +1,64 @@
 # # .gitlab-ci.yml
 stages:
-  - sonarqube-check
-#   - test
-#   - coverage
+  - build
+  - test
+  - sonar-analysis
+  # - coverage
 
+variables:
+  SONAR_HOST_URL: "http://34.27.107.36:9000/"
+  SONAR_LOGIN: "sqp_1ca140afbef2c2c2d5e269943285216566df7e84"
+  MAVEN_CLI_OPTS: "-Dmaven.test.failure.ignore=true"
 
-sonarqube-check:
-  image: maven:3.8.6-eclipse-temurin-17
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-    GIT_DEPTH: "0"  # Tells git to fetch all branches
-    # GIT_STRATEGY: none  # Prevents GitLab from automatically checking out the repository
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script: 
-    - mvn verify sonar:sonar \
-        -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK \
-        -Dsonar.login=$SONAR_TOKEN
-  allow_failure: true
-  only:
-    - master
-
-# image: maven:3.8.6-eclipse-temurin-17
-# build:
-#   stage: build
-#   script: 
-#     - mvn clean compile
-#   artifacts:
-#     paths: 
-#       - target/
-
-# # Test Job
-# test:
-#   stage: test
-#   script:
-#     - echo "Connecting to GCP MySQL instance..."
-#     - mvn test -X
-#   artifacts:
+# sonarqube-check:
+#   image: maven:3.8.6-eclipse-temurin-17
+#   variables:
+#     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+#     GIT_DEPTH: "0"  # Tells git to fetch all branches
+#     # GIT_STRATEGY: none  # Prevents GitLab from automatically checking out the repository
+#   cache:
+#     key: "${CI_JOB_NAME}"
 #     paths:
-#       - target/  # Save compiled files and test results for the next stage
+#       - .sonar/cache
+#   script: 
+#     - mvn verify sonar:sonar \
+#         -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK \
+#         -Dsonar.login=$SONAR_TOKEN
+#   allow_failure: true
+#   only:
+#     - master
+
+image: maven:3.8.6-eclipse-temurin-17
+build:
+  stage: build
+  script: 
+    - mvn clean compile
+  artifacts:
+    paths: 
+      - target/
+
+# Test Job
+test:
+  stage: test
+  script:
+    - echo "Connecting to GCP MySQL instance..."
+    - mvn test -X
+  artifacts:
+    paths:
+      - target/  # Save compiled files and test results for the next stage
+
+sonar-analysis:
+  stage: sonar
+  image: maven:3.8.7-openjdk-17
+  script:
+    - mvn clean verify sonar:sonar \
+      -Dsonar.projectKey=Java-airline-app \
+      -Dsonar.host.url=$SONAR_HOST_URL \
+      -Dsonar.login=$SONAR_LOGIN
+  only:
+    - main
+    - master 
+    - develop
 
 # # Coverage Job
 # coverage:
