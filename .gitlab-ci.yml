@@ -76,14 +76,14 @@ sonar-analysis:
 
 
 
-stages:
-  - build
-  - test
-  - push
-  - deploy
-  - secret_detection
+# stages:
+#   - build
+#   - test
+#   - push
+#   - deploy
+#   - secret_detection
 
-image: maven:3.8.6-eclipse-temurin-17 # Default image for Maven with OpenJDK 17
+# image: maven:3.8.6-eclipse-temurin-17 # Default image for Maven with OpenJDK 17
 
 # variables:
   # IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
