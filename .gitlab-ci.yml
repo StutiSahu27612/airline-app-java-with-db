@@ -2,7 +2,7 @@
 stages:
   - build
   - test
-  - sonar-analysis
+  - sonar
   # - coverage
 
 variables:
@@ -47,7 +47,7 @@ test:
     paths:
       - target/  # Save compiled files and test results for the next stage
 
-sonar-analysis:
+sonar:
   stage: sonar
   image: maven:3.8.7-openjdk-17
   script:
