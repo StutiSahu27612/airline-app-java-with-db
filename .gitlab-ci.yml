@@ -36,10 +36,10 @@ build:
   stage: build
   script:
     - echo "Building Docker image..."
-    - mvn clean test
+    - mvn clean package
   artifacts:
     paths:
-      - target/
+      - target/airline-app.jar
  
 push:
   image: maven:3.8.6-eclipse-temurin-17
