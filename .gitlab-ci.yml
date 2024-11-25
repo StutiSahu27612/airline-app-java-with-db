@@ -1,11 +1,146 @@
-# # .gitlab-ci.yml
-stages:
-  - build
-  - test
-  - sonar
-  # - coverage
-
+image: ubuntu:22.04
+ 
 variables:
+  GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION: "us-central1"
+  GOOGLE_CLOUD_PROJECT_ID: "maximal-brace-436007-t5"  
+  CI_DEBUG_TRACE: "true"
+stages:
+  - test
+  - code_coverage
+  - build
+  - push
+  - deploy
+ 
+test:
+  image: maven:3.8.6-eclipse-temurin-17
+  stage: test
+  script:
+    - echo "Running tests..."
+    - mvn clean test
+  artifacts:
+    paths:
+      - target/
+ 
+code_coverage:
+  image: maven:3.8.6-eclipse-temurin-17
+  stage: code_coverage
+  script:
+    - echo "Generating code coverage report..."
+    - mvn jacoco:report
+  artifacts:
+    paths:
+      - target/site/jacoco
+ 
+build:
+  image: maven:3.8.6-eclipse-temurin-17
+  stage: build
+  script:
+    - echo "Building Docker image..."
+    - mvn clean test
+  artifacts:
+    paths:
+      - target/
+ 
+push:
+  image: maven:3.8.6-eclipse-temurin-17
+  stage: push
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  needs:
+    - build
+ 
+include:
+  - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@main
+    inputs:
+      stage: deploy
+      source: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+      target: us-central1-docker.pkg.dev/yukta-gcp-poc/airline-backend-image-repository/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
+ 
+ 
+ 
+# --------------------------------------------------------------------
+# image: maven:3.8.6-eclipse-temurin-17
+ 
+# variables:
+#   GOOGLE_ARTIFACT_REGISTRY_REPOSITORY_LOCATION: "us-central1"
+#   GOOGLE_CLOUD_PROJECT_ID: "yukta-gcp-poc"
+ 
+# stages:
+#   - test
+#   - code_coverage
+#   - build
+#   - push
+#   - deploy
+ 
+# test:
+#   stage: test
+#   script:
+#     - echo "Running tests..."
+#     - mvn clean test
+#   artifacts:
+#     paths:
+#       - target/
+ 
+# code_coverage:
+#   stage: code_coverage
+#   script:
+#     - echo "Generating code coverage report..."
+#     - mvn jacoco:report
+#   artifacts:
+#     paths:
+#       - target/site/jacoco
+ 
+# build:
+#   stage: build
+#   script:
+#     - echo "Building Docker image..."
+#     - mvn clean package
+#   artifacts:
+#     paths:
+#       - target/
+ 
+# push:
+#   stage: push
+#   image: docker:20.10.7
+#   services:
+#     - docker:20.10.7-dind
+#   script:
+#     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+#     - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
+#     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+#   needs:
+#     - build
+ 
+ 
+# include:
+#   - component: gitlab.com/google-gitlab-components/artifact-registry/upload-artifact-registry@main
+#     inputs:
+#       stage: deploy
+#       source: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+#       target: us-central1-docker.pkg.dev/yukta-gcp-poc/airline-backend-image-repository/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
+ 
+ 
+ 
+ 
+
+
+
+
+
+
+# # .gitlab-ci.yml
+# stages:
+#   - build
+#   - test
+#   - sonar
+#   # - coverage
+
+# variables:
   # SONAR_HOST_URL: "http://34.27.107.36:9000/"
   # SONAR_LOGIN: "sqp_1ca140afbef2c2c2d5e269943285216566df7e84"
   # MAVEN_CLI_OPTS: "-Dmaven.test.failure.ignore=true"
@@ -28,25 +163,25 @@ variables:
 #   only:
 #     - master
 
-image: maven:3.8.6-eclipse-temurin-17
-build:
-  stage: build
-  script: 
-    - mvn clean compile
-  artifacts:
-    paths: 
-      - target/
+# image: maven:3.8.6-eclipse-temurin-17
+# build:
+#   stage: build
+#   script: 
+#     - mvn clean compile
+#   artifacts:
+#     paths: 
+#       - target/
 
-# Test Job
-test:
-  stage: test
-  script:
-    - echo "Connecting to GCP MySQL instance..."
-    - mvn test -X
-  artifacts:
-    paths:
-      - target/ 
-      - target/site/jacoco/ # Save compiled files and test results for the next stage
+# # Test Job
+# test:
+#   stage: test
+#   script:
+#     - echo "Connecting to GCP MySQL instance..."
+#     - mvn test -X
+#   artifacts:
+#     paths:
+#       - target/ 
+#       - target/site/jacoco/ # Save compiled files and test results for the next stage
 
 # sonar:
 #   stage: sonar
@@ -61,29 +196,29 @@ test:
 #     - master 
 #     - develop
 
-sonar:
-  stage: sonar
-  image: maven:3.8.6-eclipse-temurin-17
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-    GIT_DEPTH: "0"  # Tells git to fetch all branches
-    # GIT_STRATEGY: none  # Prevents GitLab from automatically checking out the repository
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script: 
-    # - mvn verify sonar:sonar -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK
-    # - Dsonar.jacoco.reportPaths=target/jacoco.exec
-      - mvn verify sonar:sonar \
-          -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK \
-          -Dsonar.host.url=http://34.27.107.36:9000 \
-          -Dsonar.login=$SONAR_TOKEN \
-          -Dsonar.jacoco.reportPaths=target/jacoco.exec
+# sonar:
+#   stage: sonar
+#   image: maven:3.8.6-eclipse-temurin-17
+#   variables:
+#     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+#     GIT_DEPTH: "0"  # Tells git to fetch all branches
+#     # GIT_STRATEGY: none  # Prevents GitLab from automatically checking out the repository
+#   cache:
+#     key: "${CI_JOB_NAME}"
+#     paths:
+#       - .sonar/cache
+#   script: 
+#     # - mvn verify sonar:sonar -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK
+#     # - Dsonar.jacoco.reportPaths=target/jacoco.exec
+#       - mvn verify sonar:sonar \
+#           -Dsonar.projectKey=javaprojectgroup1_airline-java-gcp-app_AZNDNh-EGbSvk1tmKyRK \
+#           -Dsonar.host.url=http://34.27.107.36:9000 \
+#           -Dsonar.login=$SONAR_TOKEN \
+#           -Dsonar.jacoco.reportPaths=target/jacoco.exec
 
-  allow_failure: true
-  only:
-    - master
+#   allow_failure: true
+#   only:
+#     - master
 
 # script: 
 #   - mvn verify sonar:sonar \
