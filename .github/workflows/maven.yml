@@ -27,6 +27,15 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+
+    - name: Run Trivy vulnerability scanner in repo mode
+      uses: aquasecurity/trivy-action@0.20.0
+      with:
+        scan-type: 'fs'
+        ignore-unfixed: true
+        format: table
+        severity: 'CRITICAL'
+        
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
