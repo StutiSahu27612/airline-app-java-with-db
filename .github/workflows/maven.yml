@@ -35,7 +35,14 @@ jobs:
         ignore-unfixed: true
         format: table
         severity: 'CRITICAL'
-        
+
+
+    - name: Build and run tests with Maven
+      run: mvn -B clean test --file pom.xml
+
+    - name: Generate JaCoCo code coverage report
+      run: mvn jacoco:report --file pom.xml
+      
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
