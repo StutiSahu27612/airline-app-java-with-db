@@ -46,6 +46,15 @@ jobs:
          
     - name : Example two     
       run: mvn jacoco:report
+
+    - name: Example three     
+      run: ls
+
+    - name: Example four   
+      run: cd target 
+
+    - name: Example five 
+      run: ls
      # - name: Generate JaCoCo code coverage report
     #   run: mvn jacoco:report --file pom.xml
       
