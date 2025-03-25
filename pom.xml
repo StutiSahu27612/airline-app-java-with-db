@@ -67,20 +67,53 @@
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>3.9.1.2184</version>
             </plugin> -->
-			<plugin>
+
+
+
+<!-- 			Working -->
+<!-- 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.7</version>
 				<executions>
 					<execution>
 						<goals>
-							<goal>prepare-agent</goal> <!-- This is to attach JaCoCo to the JVM -->
-							<goal>report</goal> <!-- This goal generates the code coverage report -->
+							<goal>prepare-agent</goal> 
+							<goal>report</goal> 
 						</goals>
-						<phase>test</phase> <!-- Bind to the test phase -->
+						<phase>test</phase> 
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
+
+
+<plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>0.8.7</version>
+    <executions>
+        <!-- Step 1: Attach the JaCoCo agent before tests run -->
+        <execution>
+            <id>prepare-agent</id>
+            <goals>
+                <goal>prepare-agent</goal>
+            </goals>
+            <phase>verify</phase>  <!-- Changed from "test" to "verify" -->
+        </execution>
+        
+        <!-- Step 2: Generate the report after tests -->
+        <execution>
+            <id>report</id>
+            <goals>
+                <goal>report</goal>
+            </goals>
+            <phase>verify</phase>
+        </execution>
+    </executions>
+</plugin>
+
+
+			
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
