@@ -91,16 +91,16 @@
     <artifactId>jacoco-maven-plugin</artifactId>
     <version>0.8.7</version>
     <executions>
-        <!-- Step 1: Attach the JaCoCo agent before tests run -->
+        
         <execution>
             <id>prepare-agent</id>
             <goals>
                 <goal>prepare-agent</goal>
             </goals>
-            <phase>verify</phase>  <!-- Changed from "test" to "verify" -->
+            <phase>verify</phase> 
         </execution>
         
-        <!-- Step 2: Generate the report after tests -->
+       
         <execution>
             <id>report</id>
             <goals>
@@ -109,8 +109,7 @@
             <phase>verify</phase>
         </execution>
     </executions>
-</plugin>
- -->
+</plugin> -->
 
 			
 			<plugin>
