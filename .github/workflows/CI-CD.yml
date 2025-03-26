@@ -55,7 +55,6 @@ jobs:
       
     - name: Build with Maven
       run: mvn -B package 
-    #   uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
 
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2.0.0  
@@ -63,16 +62,16 @@ jobs:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
 
-    - name: Chcking
+    - name: Chcking whether WIF is properly authenticated . 
       run: gsutil ls 
 
-    - name: gcloud 
+    - name: checking the service account associated 
       run : gcloud auth list 
-    - name: Configure Docker for GCR
-      run: |
-          gcloud auth configure-docker us-central1-docker.pkg.dev
+      
+    # - name: Configure Docker for GCR
+    #   run: |
+    #       gcloud auth configure-docker us-central1-docker.pkg.dev
  
-    # Step 3: Build Docker image
     - name: Build Docker image
       run: |
           docker build -t us-central1-docker.pkg.dev/dauntless-ether-447206-i7/airline-app-repository/airline-app-image:${{ github.sha }} .
@@ -83,15 +82,21 @@ jobs:
           gcloud auth configure-docker us-central1-docker.pkg.dev
           docker push us-central1-docker.pkg.dev/dauntless-ether-447206-i7/airline-app-repository/airline-app-image:${{ github.sha }}
 
-    - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2.0.0
-
-      # Step 4: Install gsutil (gsutil is part of gcloud, so this might not be needed if already installed)
-    - name: Install gsutil
-      run: |
-          gcloud components install gsutil
-          gsutil ls
 
 
-    - name: Checking it 
-      run: gsutil ls
+
+
+
+
+    # - name: Set up Google Cloud SDK
+    #   uses: google-github-actions/setup-gcloud@v2.0.0
+
+    #   # Step 4: Install gsutil (gsutil is part of gcloud, so this might not be needed if already installed)
+    # - name: Install gsutil
+    #   run: |
+    #       gcloud components install gsutil
+    #       gsutil ls
+
+
+    # - name: Checking it 
+    #   run: gsutil ls
