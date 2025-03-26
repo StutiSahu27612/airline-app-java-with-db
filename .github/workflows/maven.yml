@@ -34,8 +34,8 @@ jobs:
 
     - name: Set Environment Variables
       run: |
-        echo "SPRING_DATASOURCE_USERNAME=${{ secrets.USERNAME }}" >> $GITHUB_ENV
-        echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.PASSWORD }}" >> $GITHUB_ENV
+        echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
+        echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
         
     - name: Run Trivy vulnerability scanner in repo mode
       uses: aquasecurity/trivy-action@0.20.0
@@ -47,7 +47,7 @@ jobs:
 
 
     - name: Build and run tests with Maven
-      run: mvn -B clean test --file pom.xml
+      run: mvn -B clean test 
 
 
     - name: Generate JaCoCo code coverage report
@@ -60,8 +60,8 @@ jobs:
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2.0.0  
       with:
-          workload_identity_provider: projects/646247534868/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-oidc
-          service_account: java-app-github-actions@dauntless-ether-447206-i7.iam.gserviceaccount.com
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
 
     - name: Chcking
       run: gsutil ls 
