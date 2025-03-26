@@ -63,6 +63,8 @@ jobs:
           workload_identity_provider: projects/646247534868/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-oidc
           service_account: java-app-github-actions@dauntless-ether-447206-i7.iam.gserviceaccount.com
 
+    - name: Chcking
+      run: gsutil ls 
     - name: Configure Docker for GCR
       run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev
