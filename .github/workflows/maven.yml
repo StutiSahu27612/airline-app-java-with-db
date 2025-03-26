@@ -32,6 +32,11 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
+    - name: Set Environment Variables
+      run: |
+        echo "SPRING_DATASOURCE_USERNAME=${{ secrets.USERNAME }}" >> $GITHUB_ENV
+        echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.PASSWORD }}" >> $GITHUB_ENV
+        
     - name: Run Trivy vulnerability scanner in repo mode
       uses: aquasecurity/trivy-action@0.20.0
       with:
