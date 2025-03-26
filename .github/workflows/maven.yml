@@ -65,6 +65,9 @@ jobs:
 
     - name: Chcking
       run: gsutil ls 
+
+    - name: gcloud 
+      run : gcloud auth list 
     - name: Configure Docker for GCR
       run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev
