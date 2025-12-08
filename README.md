@@ -144,7 +144,7 @@ The application will start on `http://localhost:9000`
 
 ## 📡 API Endpoints
 
-Base URL: `http://localhost:9000/flight`
+Base URL: `http://localhost:9000`
 
 | Method | Endpoint | Description | Request Body |
 |--------|----------|-------------|--------------|
