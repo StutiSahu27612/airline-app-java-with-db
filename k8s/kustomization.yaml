@@ -5,6 +5,7 @@ kind: Kustomization
 namespace: airline-app
 
 # Resources to deploy in order
+# Note: app-hpa.yaml and app-ingress.yaml are optional and can be added manually
 resources:
   - namespace.yaml
   - configmap.yaml
@@ -14,6 +15,10 @@ resources:
   - mysql-service.yaml
   - app-deployment.yaml
   - app-service.yaml
+  # Uncomment to enable HPA (requires metrics-server)
+  # - app-hpa.yaml
+  # Uncomment to enable Ingress (requires domain configuration)
+  # - app-ingress.yaml
 
 # Common labels applied to all resources
 commonLabels:
