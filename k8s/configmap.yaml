@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airline-app-config
+  namespace: airline-app
+  labels:
+    app: airline-management
+data:
+  # Application configuration
+  SERVER_PORT: "9000"
+  
+  # Database configuration
+  SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-service:3306/airline?serverTimezone=UTC"
+  SPRING_DATASOURCE_DRIVER_CLASS: "com.mysql.cj.jdbc.Driver"
+  
+  # JPA/Hibernate configuration
+  SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: "org.hibernate.dialect.MySQL8Dialect"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+  SPRING_JPA_SHOW_SQL: "true"
+  SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+  
+  # MySQL Database name
+  MYSQL_DATABASE: "airline"

@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Namespace for all resources
+namespace: airline-app
+
+# Resources to deploy in order
+# Note: app-hpa.yaml and app-ingress.yaml are optional and can be added manually
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.yaml
+  - mysql-pvc.yaml
+  - mysql-deployment.yaml
+  - mysql-service.yaml
+  - app-deployment.yaml
+  - app-service.yaml
+  # Uncomment to enable HPA (requires metrics-server)
+  # - app-hpa.yaml
+  # Uncomment to enable Ingress (requires domain configuration)
+  # - app-ingress.yaml
+
+# Common labels applied to all resources
+commonLabels:
+  project: airline-management-system
+  managed-by: kustomize
+
+# Images to be replaced (useful for CI/CD)
+images:
+  - name: us-central1-docker.pkg.dev/dauntless-ether-447206-i7/airline-app-repository/airline-app-image
+    newTag: latest

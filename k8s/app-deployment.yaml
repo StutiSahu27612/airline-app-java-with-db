@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airline-app
+  namespace: airline-app
+  labels:
+    app: airline-management
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: airline-management
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: airline-management
+        tier: backend
+    spec:
+      containers:
+      - name: airline-app
+        # Replace with your actual image from GCP Artifact Registry
+        # Example: us-central1-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPO/airline-app:TAG
+        image: us-central1-docker.pkg.dev/dauntless-ether-447206-i7/airline-app-repository/airline-app-image:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9000
+          name: http
+        env:
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: airline-app-config
+              key: SERVER_PORT
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: airline-app-config
+              key: SPRING_DATASOURCE_URL
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: airline-app-secret
+              key: DB_USERNAME
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: airline-app-secret
+              key: DB_PASSWORD
+        - name: SPRING_DATASOURCE_DRIVER_CLASS
+          valueFrom:
+            configMapKeyRef:
+              name: airline-app-config
+              key: SPRING_DATASOURCE_DRIVER_CLASS
+        - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+          valueFrom:
+            configMapKeyRef:
+              name: airline-app-config
+              key: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          valueFrom:
+            configMapKeyRef:
+              name: airline-app-config
+              key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        - name: SPRING_JPA_SHOW_SQL
+          valueFrom:
+            configMapKeyRef:
+              name: airline-app-config
+              key: SPRING_JPA_SHOW_SQL
+        - name: SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL
+          valueFrom:
+            configMapKeyRef:
+              name: airline-app-config
+              key: SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /flight/
+            port: 9000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /flight/
+            port: 9000
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      # Wait for MySQL to be ready before starting the app
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox:1.28
+        command: ['sh', '-c', 'until nc -z mysql-service 3306; do echo waiting for mysql; sleep 2; done;']
