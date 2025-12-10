@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: airline-app-service
+  namespace: airline-app
+  labels:
+    app: airline-management
+    tier: backend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 9000
+    protocol: TCP
+    name: http
+  selector:
+    app: airline-management
+    tier: backend
+  # sessionAffinity: ClientIP  # Optional: enable sticky sessions

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: airline-app
+  labels:
+    name: airline-app
+    app: airline-management
